@@ -6,21 +6,24 @@ namespace InvestTask
     {
         static void Main(string[] args)
         {
-            DateTime agreementDate = DateTime.Now;
-            
-            Decimal x = 1200;
-            int r = 12;
-            int n = 1;
+            DateTime agreementDate, calculationDate;
+            Decimal x;
+            int r, n;
 
-            Console.WriteLine($"Agreement date: {agreementDate}");
-           
-            Console.WriteLine($"X: {x}");
-            Console.WriteLine($"R: {r}");
-            Console.WriteLine($"N: {n}");
+            Console.Write("Enter agreement date: ");
+            agreementDate = Convert.ToDateTime(Console.ReadLine());
+            Console.Write("Enter Calculation date: ");
+            calculationDate = Convert.ToDateTime(Console.ReadLine());
+            Console.Write("Enter X: ");
+            x = Convert.ToDecimal(Console.ReadLine());
+            Console.Write("Enter R: ");
+            r = Convert.ToInt32(Console.ReadLine());
+            Console.Write("Enter N: ");
+            n = Convert.ToInt32(Console.ReadLine());
 
             Investment investment = new Investment(agreementDate, x, r, n);
 
-            string[] strings = investment.GetPayments(agreementDate.AddYears(1));
+            string[] strings = investment.GetPayments(calculationDate);
 
             for (int i = 0; i < strings.Length; i++)
             {

@@ -21,21 +21,32 @@ namespace InvestTask
 
         public string[] GetPayments(DateTime calculationDate)
         {
-            decimal paymentsSum = 0;
+            decimal principalAmountSum = 0;
             decimal paymentAmount = CalculatePaymentAmount();
+            decimal interestAmount;
+            decimal balanceOwed;
             int monthCount = CalculateMonthCount(calculationDate);
             string[] payments = new string[monthCount];
-            for (int i = 0; i < monthCount; i++)
+            for (int i = 0, j = _numberOfPayments; i < monthCount; i++, j--)
             {
-                if (i == monthCount - 1)
+                decimal principalAmount;
+                if (i == monthCount - 1 && j == 1)
                 {
-                    payments[i] = $"{i + 1}. Payment Amount: {_dollars - paymentsSum}";
+                    principalAmount = Math.Round((_dollars - principalAmountSum), 2);
+                    paymentAmount = principalAmount * (decimal)Math.Pow((1 + ((double)_ratePerMonth)), j);
+                    paymentAmount = Math.Round(paymentAmount, 2);
                 }
                 else
                 {
-                    payments[i] = $"{i + 1}. Payment Amount: {paymentAmount}";
-                    paymentsSum += paymentAmount;
+                    principalAmount = paymentAmount / ((decimal)Math.Pow((1 + ((double)_ratePerMonth)), j));
                 }
+   
+                principalAmount = Math.Round(principalAmount, 2);
+                principalAmountSum += principalAmount;
+                interestAmount = paymentAmount - principalAmount;
+                balanceOwed = _dollars - principalAmountSum;
+
+                payments[i] = $"{i + 1}. Payment amount: {paymentAmount} Principal amount: {principalAmount} Interest amount: {interestAmount} Balance owed {balanceOwed}";
             }
 
             return payments;
@@ -44,23 +55,12 @@ namespace InvestTask
         private decimal CalculatePaymentAmount()
         {
             decimal paymentAmount = 0;
-
             decimal numerator = _dollars * _ratePerMonth * Convert.ToDecimal(Math.Pow((1 + ((double)_ratePerMonth)), _numberOfPayments));
             decimal denominator = Convert.ToDecimal(Math.Pow((1 + ((double)_ratePerMonth)), _numberOfPayments) - 1);
-
+            
             paymentAmount = (numerator / denominator);
 
             return Math.Round(paymentAmount, 2);
-        }
-
-        private void CalculatePrincipalAmount()
-        {
-
-        }
-
-        private void CalculateInterestAmount()
-        {
-
         }
 
         private int CalculateNumberOfPayments()
@@ -78,13 +78,21 @@ namespace InvestTask
             int months = 0;
             DateTime temporaryDate = _agreementDate;
 
-            while (true)
+            if (calculationDate > _agreementDate.AddYears(_investmentDuration))
+            {
+                return _numberOfPayments;
+            }
+            if (calculationDate < _agreementDate)
+            {
+                return months;
+            }
+
+            while (temporaryDate < calculationDate)
             {
                 temporaryDate = temporaryDate.AddMonths(1);
-                months++;
-                if (temporaryDate.Month == calculationDate.Month && temporaryDate.Year == calculationDate.Year)
+                if (temporaryDate <= calculationDate)
                 {
-                    break;
+                    months++;
                 }
             }
 
